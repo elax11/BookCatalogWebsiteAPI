@@ -27,5 +27,23 @@ namespace SecondRadencyTask.Domain
                     .ToList();
             return list;
         }
+        public IEnumerable<BookViewModelById> GetBooksById(Func<Book, bool> order)
+        {
+            var list = libraryContext.Book
+                    .Where(order)
+                    .Select(x => new BookViewModelById
+                    {
+                        Id = x.Id,
+                        Title = x.Title,
+                        Author = x.Author,
+                        Cover = x.Cover,
+                        Content = x.Content,
+                        Rating = (decimal)libraryContext.Rating.Where(y => y.BookId == x.Id).Select(y => y.Score).Average(),
+                        Reviews = libraryContext.Review
+                            .Where(y => y.BookId == x.Id)
+                    })
+                    .ToList();
+            return list;
+        }
     }
 }

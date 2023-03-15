@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using SecondRadencyTask.Domain;
 using SecondRadencyTask.Persistance;
-using System;
-using System.Diagnostics.Metrics;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IRecommendedRepository, RecommendedRepository>();
+builder.Services.AddScoped<ILibraryConfiguration, LibraryConfiguration>();
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<LibraryContext>(
@@ -14,13 +14,11 @@ builder.Services.AddDbContext<LibraryContext>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
-using(var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetService<LibraryContext>();
     context.Database.EnsureCreated();
 }
-/*var context = app.Services.GetService<LibraryContext>();
-context.Database.EnsureCreated();*/
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -6,7 +6,7 @@ using SecondRadencyTask.Persistance.Models;
 
 namespace SecondRadencyTask.Controllers
 {
-    [Route("api/[controller]")]
+    /*[Route("api/[controller]")]*/
     [ApiController]
     public class BooksController : ControllerBase
     {
@@ -17,6 +17,7 @@ namespace SecondRadencyTask.Controllers
             this.bookRepository = bookRepository;
         }
 
+        [Route("api/[controller]")]
         [HttpGet]
         public ActionResult<IEnumerable<BookViewModel>> Get([FromQuery] GetAllBooksRequest request)
         {
@@ -37,6 +38,23 @@ namespace SecondRadencyTask.Controllers
                 default:
                     return (Book book) => book.Author;
             }
+        }
+
+        [Route("api/[controller]/{id}")]
+        [HttpGet]
+        public ActionResult<IEnumerable<BookViewModel>> Get(int id)
+        {
+            var orderExpresssion = GetOrderExpression(id);
+            return Ok(bookRepository.GetBooksById(orderExpresssion));
+            /*var orderExpression = mapper.Map<OrderExpression>(request);
+            var books = bookRepository.GetBooks(orderExpression);
+            var booksViewModel = mapper.Map<BookViewModel>(books);
+            return Ok(booksViewModel);*/
+        }
+
+        Func<Book, bool> GetOrderExpression(int id)
+        {
+            return (Book book) => book.Id == id;
         }
     }
 

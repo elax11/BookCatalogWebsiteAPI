@@ -9,10 +9,6 @@ namespace SecondRadencyTask.Persistance
         {
 
         }
-        /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseInMemoryDatabase(databaseName: "BooksDb");
-        }*/
         public DbSet<Review> Review { get; set; }
         public DbSet<Book> Book { get; set; }
         public DbSet<Rating> Rating { get; set; }
