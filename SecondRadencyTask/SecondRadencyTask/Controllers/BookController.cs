@@ -2,6 +2,7 @@
 using SecondRadencyTask.Controllers.Models;
 using SecondRadencyTask.Controllers.Objects;
 using SecondRadencyTask.Domain;
+using SecondRadencyTask.Persistance;
 using SecondRadencyTask.Persistance.Models;
 
 namespace SecondRadencyTask.Controllers
@@ -11,10 +12,12 @@ namespace SecondRadencyTask.Controllers
     public class BooksController : ControllerBase
     {
         readonly IBookRepository bookRepository;
+        LibraryContext libraryContext { get; set; }
 
-        public BooksController(IBookRepository bookRepository)
+        public BooksController(IBookRepository bookRepository, LibraryContext libraryContext)
         {
             this.bookRepository = bookRepository;
+            this.libraryContext = libraryContext;
         }
 
         [Route("api/[controller]")]
@@ -56,33 +59,56 @@ namespace SecondRadencyTask.Controllers
         {
             return (Book book) => book.Id == id;
         }
-    }
 
-    [Route("api/[controller]")]
-    [ApiController]
-    public class RecommendedController : ControllerBase
-    {
-        readonly IRecommendedRepository recommendedRepository;
-
-        public RecommendedController(IRecommendedRepository recommendedRepository)
+        [Route("api/[controller]/{id}")]
+        [HttpDelete]
+        public void Delete(int id, string secret)
         {
-            this.recommendedRepository = recommendedRepository;
-        }
-
-        [HttpGet]
-        public ActionResult<IEnumerable<BookViewModel>> Get(string genre)
-        {
-            var orderExpresssion = GetOrderExpression(genre);
-            return Ok(recommendedRepository.Get10BooksFilterByGenre(orderExpresssion));
+            var orderExpresssion = GetOrderExpressionForDeleting(id);
+            bookRepository.DeleteBooksByIdWithKey(orderExpresssion, secret);
             /*var orderExpression = mapper.Map<OrderExpression>(request);
             var books = bookRepository.GetBooks(orderExpression);
             var booksViewModel = mapper.Map<BookViewModel>(books);
             return Ok(booksViewModel);*/
         }
 
-        Func<Book, bool> GetOrderExpression(string genre)
+        Func<Book, bool> GetOrderExpressionForDeleting(int id)
         {
-            return (Book book) => book.Genre == genre;
+            return (Book book) => book.Id == id;
+        }
+
+        [Route("api/[controller]/save")]
+        [HttpPost]
+        public ActionResult<BookCreatedResponse> Post(Book book)
+        {
+            if (book.Id != 0 && !libraryContext.Book.Any(x => x.Id == book.Id))
+                return BadRequest("request is incorrect");
+            return Ok(bookRepository.SaveBook(book));
+            /*var orderExpresssion = GetOrderExpressionForSave(id);
+            return bookRepository.SaveBook(orderExpresssion);*/
+            /*var orderExpression = mapper.Map<OrderExpression>(request);
+            var books = bookRepository.GetBooks(orderExpression);
+            var booksViewModel = mapper.Map<BookViewModel>(books);
+            return Ok(booksViewModel);*/
+        }
+
+        [Route("api/[controller]/{id}/review")]
+        [HttpPut]
+        public ActionResult<BookCreatedResponse> Put(int id, UpdateReviewRequest updateReviewRequest)
+        {
+            if (!libraryContext.Book.Any(x => x.Id == id))
+                return BadRequest("request is incorrect");
+            return Ok(bookRepository.SaveReview(id, updateReviewRequest));
+        }
+
+        [Route("api/[controller]/{id}/rate")]
+        [HttpPut]
+        public ActionResult<BookCreatedResponse> Put(int id, RateBook rateBook)
+        {
+            if (!libraryContext.Book.Any(x => x.Id == id))
+                return BadRequest("request is incorrect");
+            bookRepository.SaveRate(id, rateBook);
+            return Ok();
         }
     }
 }
