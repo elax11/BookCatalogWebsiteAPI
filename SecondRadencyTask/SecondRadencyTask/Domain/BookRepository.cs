@@ -40,9 +40,9 @@ namespace SecondRadencyTask.Domain
             return (decimal)libraryContext.Rating.Where(y => y.BookId == x.Id).Select(y => y.Score).DefaultIfEmpty().Average();
         }
 
-        public IEnumerable<BookViewModelById> GetBooksById(Func<Book, bool> order)
+        public BookViewModelById GetBookById(Func<Book, bool> order)
         {
-            var list = libraryContext.Book
+            var book = libraryContext.Book
                     .Where(order)
                     .Select(x => new BookViewModelById
                     {
@@ -51,12 +51,12 @@ namespace SecondRadencyTask.Domain
                         Author = x.Author,
                         Cover = x.Cover,
                         Content = x.Content,
-                        Rating = (decimal)libraryContext.Rating.Where(y => y.BookId == x.Id).Select(y => y.Score).Average(),
+                        Rating = GetRating(x),
                         Reviews = libraryContext.Review
                             .Where(y => y.BookId == x.Id)
                     })
-                    .ToList();
-            return list;
+                    .FirstOrDefault();
+            return book;
         }
         public string DeleteBooksByIdWithKey(Func<Book, bool> order, string secret)
         {
@@ -76,7 +76,7 @@ namespace SecondRadencyTask.Domain
             {
                 libraryContext.Book.Update(book);
                 libraryContext.SaveChanges();
-                return new BookCreatedResponse {Id = book.Id };
+                return new BookCreatedResponse { Id = book.Id };
             }
             else
             {

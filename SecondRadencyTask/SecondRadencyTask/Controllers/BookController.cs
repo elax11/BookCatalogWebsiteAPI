@@ -4,10 +4,10 @@ using SecondRadencyTask.Controllers.Objects;
 using SecondRadencyTask.Domain;
 using SecondRadencyTask.Persistance;
 using SecondRadencyTask.Persistance.Models;
+using System.Web.Http.Cors;
 
 namespace SecondRadencyTask.Controllers
 {
-    /*[Route("api/[controller]")]*/
     [ApiController]
     public class BooksController : ControllerBase
     {
@@ -48,7 +48,7 @@ namespace SecondRadencyTask.Controllers
         public ActionResult<IEnumerable<BookViewModel>> Get(int id)
         {
             var orderExpresssion = GetOrderExpression(id);
-            return Ok(bookRepository.GetBooksById(orderExpresssion));
+            return Ok(bookRepository.GetBookById(orderExpresssion));
             /*var orderExpression = mapper.Map<OrderExpression>(request);
             var books = bookRepository.GetBooks(orderExpression);
             var booksViewModel = mapper.Map<BookViewModel>(books);
